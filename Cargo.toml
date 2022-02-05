@@ -1,12 +1,19 @@
 [package]
-name = "spm"
+name = "sprd-backend"
 version = "0.1.0"
 authors = ["Gajo Petrovic <gajopetrovic@gmail.com>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-flate2 = "1.0.17"
+diesel = { version = "1.4.5", features = ["postgres"] }
+dotenv = "0.15.0"
+flate2 = "1.0.19"
 walkdir = "2"
-diesel = { version = "1.0.0", features = ["sqlite"] }
+rocket = "0.4.6"
+serde = { version = "1.0", features = ["derive"] }
+clap = "2.33.3"
+
+[dependencies.rocket_contrib]
+version = "0.4.6"
+default-features = false
+features = ["json"]

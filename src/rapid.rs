@@ -1,89 +1,63 @@
-use std::ffi::OsStr;
-use std::io::prelude::*;
-use std::fs;
-
-use walkdir::WalkDir;
-
+use std::error::Error;
 use std::path;
 
-
-use flate2::read::GzDecoder;
-
-
-fn read_binary_file(path: &path::Path) -> std::io::Result<Vec<u8>> {
-    let mut versions_file = fs::File::open(path)?;
-    let mut contents = Vec::new();
-    versions_file.read_to_end(&mut contents)?;
-
-    Ok(contents)
+#[derive(Debug)]
+pub struct Repo {
+    pub name: String,
+    pub url: String,
 }
 
-fn read_gz_from_data(data: Vec<u8>) -> std::io::Result<String> {
-    let mut d = GzDecoder::new(&data[..]);
-    let mut s = String::new();
-    d.read_to_string(&mut s)?;
-
-    Ok(s)
+#[derive(Debug)]
+pub struct SDP {
+    pub fullname: String,
+    pub something: String, // what's the purpose of this field?
+    pub md5: String,
+    pub alias: String,
 }
 
-fn read_gz_from_file(path: &path::Path) -> std::io::Result<String> {
-    let data = read_binary_file(path)?;
-    let unzipped = read_gz_from_data(data)?;
-
-    Ok(unzipped)
+pub fn parse_repos_from_file(path: &path::Path) -> Result<Vec<Repo>, Box<dyn Error>> {
+    let s = crate::gz::read_gz_from_file(path)?;
+    parse_repos_from_str(&s)
 }
 
-pub struct RapidEntry {
-    fullname: String,
-    something: String, // what's the purpose of this field?
-    hash: String,
-    alias: String
-}
-
-fn read_rapid_from_file(path: &path::Path) -> std::io::Result<Vec<RapidEntry>> {
-    let parsed_gz = read_gz_from_file(path)?;
-
+pub fn parse_repos_from_str(s: &str) -> Result<Vec<Repo>, Box<dyn Error>> {
     let mut entries = Vec::new();
 
-    for line in parsed_gz.lines() {
+    for line in s.lines() {
         let line_entry: Vec<&str> = line.split(',').collect();
-        if line_entry.len() != 4 {
-            continue;
-        }
-        entries.push(RapidEntry{
-            fullname: line_entry[0].to_string(),
-            hash: line_entry[2].to_string(),
-            something: line_entry[3].to_string(),
-            alias: line_entry[2].to_string()
+        let name = line_entry[0];
+        let url = line_entry[1];
+
+        entries.push(Repo {
+            name: name.to_string(),
+            url: url.to_string(),
         });
     }
 
     Ok(entries)
 }
 
-pub fn parse_rapid(directory_path: &path::Path) -> std::io::Result<()> {
-    for entry in WalkDir::new(directory_path) {
-        let e = entry?;
-        let path = e.path();
-        if path.extension() == Some(OsStr::new("gz")) {
-            // println!("{:?}", path);
-            // let read_result = read_gz_from_file(path);
-            // if let Ok(s) = read_result {
-            //     println!("{}", s);
-            // }
-            println!("{:?}", path);
-            let rapid_entries = read_rapid_from_file(path);
-            if let Ok(rapid_entries) = rapid_entries {
-                for entry in rapid_entries {
-                    if entry.something != "" {
-                        println!("{} {} {} {}", entry.fullname, entry.hash, entry.something, entry.alias);
-                    }
-                }
-            }
+pub fn read_rapid_from_file(path: &path::Path) -> Result<Vec<SDP>, Box<dyn Error>> {
+    let parsed_gz = crate::gz::read_gz_from_file(path)?;
+    read_rapid_from_str(&parsed_gz)
+}
+
+pub fn read_rapid_from_str(parsed_gz: &str) -> Result<Vec<SDP>, Box<dyn Error>> {
+    let mut entries = Vec::new();
+
+    for line in parsed_gz.lines() {
+        let line_entry: Vec<&str> = line.split(',').collect();
+        if line_entry.len() != 4 {
+            println!("MALFORMED FILE");
+            continue;
         }
+        entries.push(SDP {
+            fullname: line_entry[0].to_string(),
+            md5: line_entry[1].to_string(),
+            something: line_entry[3].to_string(),
+            alias: line_entry[2].to_string(),
+        });
     }
 
-    // println!("{}", s);
-
-    Ok(())
+    Ok(entries)
 }
