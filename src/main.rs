@@ -1,15 +1,10 @@
-#![feature(proc_macro_hygiene, decl_macro)]
+// #![feature(proc_macro_hygiene, decl_macro)]
 
 #[macro_use]
 extern crate rocket;
 
-// #[macro_use]
-extern crate rocket_contrib;
-
 #[macro_use]
 extern crate serde;
-
-use rocket_contrib::json::Json;
 
 #[macro_use]
 extern crate diesel;
@@ -21,7 +16,7 @@ use db::models::Repo;
 mod gz;
 mod rapid;
 
-use rocket::http::RawStr;
+use rocket::serde::json::Json;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct JsonApiResponse {
@@ -30,7 +25,7 @@ pub struct JsonApiResponse {
 
 #[get("/rapid_entries")]
 fn rapid_entries_get() -> Json<JsonApiResponse> {
-    let mut response = JsonApiResponse{ data: vec![], };
+    let mut response = JsonApiResponse { data: vec![] };
 
     let conn = db::establish_connection();
     for rapid_entry in db::query_rapid_entries(&conn) {
@@ -42,39 +37,39 @@ fn rapid_entries_get() -> Json<JsonApiResponse> {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SDPQuery {
     rapid: RapidEntry,
-    repo: Repo
+    repo: Repo,
 }
 
 #[get("/sdp/<name>")]
-fn sdp_get(name: &RawStr) -> Json<Option<SDPQuery>> {
+fn sdp_get(name: &str) -> Json<Option<SDPQuery>> {
     let conn = db::establish_connection();
-    let rapid_entry = db::find_rapid_entry(&conn, name.as_str());
+    let rapid_entry = db::find_rapid_entry(&conn, name);
     match rapid_entry {
         Some(rapid_entry) => {
             let repo = db::find_repo_by_id(&conn, rapid_entry.repo_id).unwrap();
             let result = SDPQuery {
                 rapid: rapid_entry,
-                repo: repo
+                repo,
             };
             Json(Some(result))
-        },
+        }
         None => Json(None),
     }
 }
 
 #[get("/rapid_entry/<name>")]
-fn rapid_entry_get(name: &RawStr) -> Json<Option<SDPQuery>> {
+fn rapid_entry_get(name: &str) -> Json<Option<SDPQuery>> {
     let conn = db::establish_connection();
-    let rapid_entry = db::find_rapid_entry(&conn, name.as_str());
+    let rapid_entry = db::find_rapid_entry(&conn, name);
     match rapid_entry {
         Some(rapid_entry) => {
             let repo = db::find_repo_by_id(&conn, rapid_entry.repo_id).unwrap();
             let result = SDPQuery {
                 rapid: rapid_entry,
-                repo: repo
+                repo,
             };
             Json(Some(result))
-        },
+        }
         None => Json(None),
     }
 }
@@ -85,14 +80,21 @@ pub struct APIRapidEntry {
 }
 
 #[get("/rapid/<name>")]
-fn rapid_search_get(name: &RawStr) -> Json<APIRapidEntry> {
+fn rapid_search_get(name: &str) -> Json<APIRapidEntry> {
     let conn = db::establish_connection();
-    let rapid = db::query_find_rapid_entry(&conn, name.as_str());
-    Json(APIRapidEntry { rapid_entry: rapid } )
+    let rapid = db::query_find_rapid_entry(&conn, name);
+    Json(APIRapidEntry { rapid_entry: rapid })
 }
 
-fn main() {
-    rocket::ignite()
-        .mount("/", routes![rapid_entries_get, rapid_search_get, sdp_get, rapid_entry_get])
-        .launch();
+#[launch]
+fn rocket() -> _ {
+    rocket::build().mount(
+        "/",
+        routes![
+            rapid_entries_get,
+            rapid_search_get,
+            sdp_get,
+            rapid_entry_get
+        ],
+    )
 }
