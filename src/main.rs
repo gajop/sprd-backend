@@ -34,6 +34,11 @@ fn rapid_entries_get() -> Json<JsonApiResponse> {
     Json(response)
 }
 
+#[get("/")]
+fn index() -> Json<JsonApiResponse> {
+    rapid_entries_get()
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SDPQuery {
     rapid: RapidEntry,
@@ -86,15 +91,36 @@ fn rapid_search_get(name: &str) -> Json<APIRapidEntry> {
     Json(APIRapidEntry { rapid_entry: rapid })
 }
 
-#[launch]
-fn rocket() -> _ {
-    rocket::build().mount(
-        "/",
-        routes![
-            rapid_entries_get,
-            rapid_search_get,
-            sdp_get,
-            rapid_entry_get
-        ],
-    )
+// #[launch]
+// fn rocket() -> _ {
+//     rocket::build().mount(
+//         "/",
+//         routes![
+//             index,
+//             rapid_entries_get,
+//             rapid_search_get,
+//             sdp_get,
+//             rapid_entry_get
+//         ],
+//     )
+// }
+
+#[rocket::main]
+async fn main() {
+    let _connection = db::establish_connection();
+
+    rocket::build()
+        .mount(
+            "/",
+            routes![
+                index,
+                rapid_entries_get,
+                rapid_search_get,
+                sdp_get,
+                rapid_entry_get
+            ],
+        )
+        .launch()
+        .await
+        .unwrap();
 }

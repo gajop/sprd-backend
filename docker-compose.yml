@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  rocket:
+    build: .
+    ports:
+      - 8080:8080
+    links:
+      - db
+    command: ./target/release/sprd-backend
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=spm
+      - POSTGRES_PASSWORD=test1234
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+
+volumes:
+  db:
+    driver: local

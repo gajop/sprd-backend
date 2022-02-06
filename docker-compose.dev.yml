@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - APP_DB_USER=sprd
+      - APP_DB_PASS=test1234
+      - APP_DB_NAME=sprd
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db-migration:
+    image: gajop/diesel-cli
+    env_file:
+      - ./.env
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      db:
+        condition: service_healthy
+    command: diesel migration run
+
+  rocket:
+    build: .
+    ports:
+      - 8080:8080
+    links:
+      - db
+    volumes:
+      - ./:/app
+    command: ./target/debug/sprd-backend
+    depends_on:
+      db:
+        condition: service_healthy
+      db-migration:
+        condition: service_started
+    restart: always
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 7070:8080
+
+volumes:
+  db:
+    driver: local

@@ -19,7 +19,4 @@ table! {
 
 joinable!(rapid_entry -> repo (repo_id));
 
-allow_tables_to_appear_in_same_query!(
-    rapid_entry,
-    repo,
-);
+allow_tables_to_appear_in_same_query!(rapid_entry, repo,);
