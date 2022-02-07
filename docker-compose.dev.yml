@@ -47,6 +47,21 @@ services:
         condition: service_started
     restart: always
 
+  updater:
+    build: .
+    links:
+      - db
+    volumes:
+      - ./:/app
+      - rapid:/rapid
+    command: ./bin/update.sh
+    depends_on:
+      db:
+        condition: service_healthy
+      db-migration:
+        condition: service_started
+    restart: always
+
   adminer:
     image: adminer
     restart: always
@@ -56,3 +71,4 @@ services:
 volumes:
   db:
     driver: local
+  rapid:

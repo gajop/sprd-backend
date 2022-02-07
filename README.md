@@ -18,8 +18,10 @@ Populate the data from disk:
 `docker-compose up -d`
 
 ## TODO
-- Make update run in Docker, periodically
-- Update rapid before running updater
+- Store .env on GitHub
+- Setup production Docker compose
+- sprd binary
+- use sprd as a library instead of copy pasting parts
 
 
 <!-- OLD:
