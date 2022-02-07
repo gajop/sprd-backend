@@ -48,7 +48,10 @@ impl<'a> RapidStore<'a> {
     }
 
     pub fn get_repo_path(&self, repo: &Repo) -> path::PathBuf {
-        let http_split: Vec<&str> = repo.url.split("http://").collect();
+        let mut http_split: Vec<&str> = repo.url.split("http://").collect();
+        if http_split.len() != 2 {
+            http_split = repo.url.split("https://").collect();
+        }
         let name = http_split[1];
         self.root_folder.join(format!("rapid/{}/version.gz", name))
     }
