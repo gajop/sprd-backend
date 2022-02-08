@@ -23,7 +23,7 @@ services:
   db-migration:
     image: gajop/diesel-cli
     env_file:
-      - ./.env
+      - .env.dev
     volumes:
       - ./migrations:/migrations
     depends_on:
@@ -33,6 +33,8 @@ services:
 
   rocket:
     build: .
+    env_file:
+      - .env.dev
     ports:
       - 8080:8080
     links:
@@ -49,6 +51,8 @@ services:
 
   updater:
     build: .
+    env_file:
+      - .env.dev
     links:
       - db
     volumes:

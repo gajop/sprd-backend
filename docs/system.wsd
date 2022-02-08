@@ -1,0 +1,31 @@
+@startuml Backend System
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include DEVICONS/postgresql.puml
+!include DEVICONS/rust.puml
+
+
+System_Boundary(sprdBackend, "sprd backend") {
+	Container(rocket, "Metadata REST server", "Rocket(Rust)", "Serves Rapid metadata for fast client querying", $sprite="rust")
+	ContainerDb(db, "Database", "Postgres", "Stores metadata information", $sprite="postgresql")
+	Container(updater, "Metadata updater", "Background service (Rust&Bash)", "Continously updates the database using official Rapid data", $sprite="rust")
+}
+Rel(rocket, db, "Reads stored information")
+
+
+Rel(updater, db, "Populates database")
+
+System(springBackend, "SpringRTS Rapid backend", "springrts.com hosted backend (source of truth)")
+Rel(updater, springBackend, "Clones official metadata")
+
+Person(user, "Spring Gamer")
+Container(sprd, "sprd", "Rapid client(Rust)", "Provides most of the same functionality as pr-downloader", $sprite="rust")
+Rel(user, sprd, "Downloads/Updates Rapid games")
+Rel(sprd, rocket, "Fetches only the necessary metadata O(1)")
+Rel(sprd, springBackend, "Downloads Rapid data")
+
+
+@enduml

@@ -1,3 +1,12 @@
+# sprd-backend
+
+Provides the fast metadata query API for SpringRTS Rapid protocol.
+
+System architecture:
+
+![System architecture](./docs/Backend%20System.png)
+
+
 # Install
 
 
@@ -18,9 +27,9 @@ Populate the data from disk:
 `docker-compose up -d`
 
 ## TODO
-- Store .env on GitHub
 - Setup production Docker compose
-- sprd binary
+- Store .env on GitHub
+- Explain sprd binary
 - use sprd as a library instead of copy pasting parts
 
 
