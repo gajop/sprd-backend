@@ -1,7 +1,8 @@
 #!/bin/bash
 
+export SLEEP_TIME=60
+
 echo "Starting updater script..."
-sleep 5
 
 echo "Updating rapid(registry)..."
 ./bin/sprd --root-folder /rapid download-registry
@@ -10,6 +11,6 @@ echo "Updating rapid(repo)..."
 
 echo "Updating database..."
 ./target/debug/update --root-folder /rapid
-echo "Done"
+echo "Done. Sleeping for ${SLEEP_TIME} seconds..."
 
-sleep 55
+sleep $SLEEP_TIME
