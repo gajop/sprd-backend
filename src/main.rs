@@ -1,4 +1,5 @@
-// #![feature(proc_macro_hygiene, decl_macro)]
+#![warn(clippy::all)]
+#![warn(rust_2018_idioms)]
 
 #[macro_use]
 extern crate rocket;
