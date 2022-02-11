@@ -1,7 +1,7 @@
 use std::{collections::HashMap, error::Error};
 
 use clap::{App, Arg};
-use db::create_repo;
+use db::api::repo;
 
 use std::path;
 
@@ -40,11 +40,11 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         };
 
-        let repo_db = match db::find_repo_by_name(&conn, &repo.name) {
+        let repo_db = match repo::get_by_name(&conn, &repo.name) {
             Some(repo_db) => repo_db,
             None => {
-                create_repo(&conn, &repo.name, &repo.url);
-                db::find_repo_by_name(&conn, &repo.name).unwrap()
+                repo::create(&conn, &repo.name, &repo.url);
+                repo::get_by_name(&conn, &repo.name).unwrap()
             }
         };
 
