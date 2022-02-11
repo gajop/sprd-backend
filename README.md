@@ -50,7 +50,12 @@ Populate the data from disk:
 
 ## Production
 
-`docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build`
+```sh
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+```
+
+PS: Don't run with the --build
 
 ### AWS
 
