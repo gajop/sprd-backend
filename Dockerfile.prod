@@ -7,7 +7,7 @@ RUN mkdir -p /out && cp target/release/sprd-backend /out/ && cp target/release/u
 
 FROM debian:buster-slim
 RUN apt-get update && apt-get install -y libpq-dev && rm -rf /var/lib/apt/lists/*
-COPY --from=builder /out/* /app
+COPY --from=builder /out/ /app
 
 # Need for updater
 COPY ./bin/update.prod.sh /app/update.sh
