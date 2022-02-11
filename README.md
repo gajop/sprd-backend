@@ -12,11 +12,12 @@ System architecture:
 
 This project uses docker-compose. Install Docker if you haven't.
 
-## Devevelopment
+## Development
+
 
 Install and startup all services.
 
-`docker-compose -f docker-compose.dev.yml up --build`
+`docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build`
 
 Populate the data from disk:
 
@@ -24,7 +25,7 @@ Populate the data from disk:
 
 ## Production
 
-`docker-compose up -d`
+`docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build`
 
 ## TODO
 - Setup production Docker compose

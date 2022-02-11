@@ -1,25 +1,63 @@
-version: "3.8"
+version: "3.9"
+
+# TODO: Cleanup passwords?
 
 services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - APP_DB_USER=sprd
+      - APP_DB_PASS=test1234
+      - APP_DB_NAME=sprd
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db-migration:
+    image: gajop/diesel-cli
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      db:
+        condition: service_healthy
+    command: diesel migration run
+
   rocket:
     build: .
     ports:
       - 8080:8080
     links:
       - db
-    command: ./target/release/sprd-backend
-
-  db:
-    image: postgres
+    depends_on:
+      db:
+        condition: service_healthy
+      db-migration:
+        condition: service_started
     restart: always
-    environment:
-      - POSTGRES_USER=spm
-      - POSTGRES_PASSWORD=test1234
-    ports:
-      - '5432:5432'
+
+  updater:
+    links:
+      - db
     volumes:
-      - db:/var/lib/postgresql/data
+      - rapid:/rapid
+    depends_on:
+      db:
+        condition: service_healthy
+      db-migration:
+        condition: service_started
+    restart: always
+    command: /app/update.sh
 
 volumes:
   db:
     driver: local
+  rapid:

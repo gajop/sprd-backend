@@ -1,0 +1,21 @@
+version: "3.8"
+
+# TODO: Make a prod-only .env file
+
+services:
+  db-migration:
+    env_file:
+      - .env.dev
+
+  rocket:
+    image: gajop/sprd-backend
+    env_file:
+      - .env.dev
+    ports:
+      - 80:80
+    command: /app/sprd-backend
+
+  updater:
+    image: gajop/sprd-backend
+    env_file:
+      - .env.dev

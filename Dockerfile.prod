@@ -9,6 +9,10 @@ FROM debian:buster-slim
 RUN apt-get update && apt-get install -y libpq-dev && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /out/* /app
 
+# Need for updater
+COPY ./bin/update.prod.sh /app/update.sh
+COPY ./bin/sprd /app/sprd
+
 ENV ROCKET_ADDRESS=0.0.0.0
 ENV ROCKET_PORT=80
 
