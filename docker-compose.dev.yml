@@ -21,6 +21,7 @@ services:
       - .env.dev
     volumes:
       - ./:/app
+    command: /app/bin/update.sh
 
   adminer:
     image: adminer
