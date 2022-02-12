@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export SLEEP_TIME=60
+export SLEEP_TIME=300
 
 echo "Starting updater script..."
 
