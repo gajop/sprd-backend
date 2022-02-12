@@ -26,7 +26,7 @@ fn rapid_entries_get() -> Json<RapidEntries> {
     let mut response = RapidEntries(Vec::new());
 
     let conn = db::establish_connection();
-    for rapid_entry in db::query_rapid_entries(&conn) {
+    for rapid_entry in api::rapid_entry::query(&conn) {
         response.0.push(rapid_entry);
     }
     Json(response)
@@ -46,7 +46,7 @@ pub struct SDPQuery {
 #[get("/sdp/<name>")]
 fn sdp_get(name: &str) -> Json<Option<SDPQuery>> {
     let conn = db::establish_connection();
-    let rapid_entry = db::find_rapid_entry(&conn, name);
+    let rapid_entry = api::rapid_entry::query_with_name(&conn, name);
     match rapid_entry {
         Some(rapid_entry) => {
             let repo = db::api::repo::get_by_id(&conn, rapid_entry.repo_id).unwrap();
@@ -63,7 +63,7 @@ fn sdp_get(name: &str) -> Json<Option<SDPQuery>> {
 #[get("/rapid_entry/<name>")]
 fn rapid_entry_get(name: &str) -> Json<Option<SDPQuery>> {
     let conn = db::establish_connection();
-    let rapid_entry = db::find_rapid_entry(&conn, name);
+    let rapid_entry = api::rapid_entry::query_with_name(&conn, name);
     match rapid_entry {
         Some(rapid_entry) => {
             let repo = api::repo::get_by_id(&conn, rapid_entry.repo_id).unwrap();
@@ -80,7 +80,7 @@ fn rapid_entry_get(name: &str) -> Json<Option<SDPQuery>> {
 #[get("/rapid/<name>")]
 fn rapid_search_get(name: &str) -> Json<Option<RapidEntry>> {
     let conn = db::establish_connection();
-    let rapid = db::query_find_rapid_entry(&conn, name);
+    let rapid = api::rapid_entry::query_with_name(&conn, name);
     Json(rapid)
 }
 

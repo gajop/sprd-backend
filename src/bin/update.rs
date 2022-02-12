@@ -1,7 +1,7 @@
 use std::{collections::HashMap, error::Error};
 
 use clap::{App, Arg};
-use db::api::repo;
+use db::api;
 
 use std::path;
 
@@ -40,15 +40,15 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         };
 
-        let repo_db = match repo::get_by_name(&conn, &repo.name) {
+        let repo_db = match api::repo::get_by_name(&conn, &repo.name) {
             Some(repo_db) => repo_db,
             None => {
-                repo::create(&conn, &repo.name, &repo.url);
-                repo::get_by_name(&conn, &repo.name).unwrap()
+                api::repo::create(&conn, &repo.name, &repo.url);
+                api::repo::get_by_name(&conn, &repo.name).unwrap()
             }
         };
 
-        let existing = db::query_rapid_entries_for_repo(&conn, repo_db.id);
+        let existing = api::rapid_entry::query_for_repo(&conn, repo_db.id);
         let mut new_map = HashMap::new();
         for sdp in &sdps {
             new_map.insert(&sdp.md5, true);
@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         for sdp in &sdps {
             if !old_map.contains_key(&sdp.md5) {
-                db::create_rapid_entry(
+                api::rapid_entry::create(
                     &conn,
                     &sdp.fullname,
                     &sdp.md5,
@@ -73,7 +73,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         for old in &existing {
             if !new_map.contains_key(&old.hash) {
-                db::delete_rapid_entry(&conn, old.id);
+                api::rapid_entry::delete(&conn, old.id);
                 deleted += 1;
             }
         }
