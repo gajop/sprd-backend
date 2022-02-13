@@ -60,23 +60,6 @@ fn sdp_get(name: &str) -> Json<Option<SDPQuery>> {
     }
 }
 
-#[get("/rapid_entry/<name>")]
-fn rapid_entry_get(name: &str) -> Json<Option<SDPQuery>> {
-    let conn = db::establish_connection();
-    let rapid_entry = api::rapid_entry::query_with_name(&conn, name);
-    match rapid_entry {
-        Some(rapid_entry) => {
-            let repo = api::repo::get_by_id(&conn, rapid_entry.repo_id).unwrap();
-            let result = SDPQuery {
-                rapid: rapid_entry,
-                repo,
-            };
-            Json(Some(result))
-        }
-        None => Json(None),
-    }
-}
-
 #[get("/rapid/<name>")]
 fn rapid_search_get(name: &str) -> Json<Option<RapidEntry>> {
     let conn = db::establish_connection();
@@ -115,7 +98,6 @@ async fn main() {
                 rapid_entries_get,
                 rapid_search_get,
                 sdp_get,
-                rapid_entry_get,
                 get_repo,
                 get_repos,
             ],
